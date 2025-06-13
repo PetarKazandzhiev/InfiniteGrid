@@ -18,10 +18,38 @@ function Grid() {
   const { offset, bind } = usePan()
   const { viewport } = useThree()
   const cols = Math.ceil(viewport.width / CELL_WIDTH) + 1
+  const imageFiles = useMemo(
+    () => [
+      'download.jpeg',
+      'download (1).jpeg',
+      'download (2).jpeg',
+      'download (3).jpeg',
+      'download (4).jpeg',
+      'download (5).jpeg',
+      'download (6).jpeg',
+      'download (7).jpeg',
+      'download (8).jpeg',
+      'download (9).jpeg',
+      'download (10).jpeg',
+      'download (11).jpeg',
+      'download (12).jpeg',
+      'download (13).jpeg',
+      'download (14).jpeg',
+      'download (15).jpeg',
+      'download (16).jpeg',
+      'download (17).jpeg',
+      'download (18).jpeg',
+      'download (19).jpeg',
+    ],
+    [],
+  )
   const images = useMemo(
     () =>
-      Array.from({ length: cols * ROWS }, (_, i) => `https://picsum.photos/seed/${i}/900/1600`),
-    [cols],
+      Array.from(
+        { length: cols * ROWS },
+        (_, i) => `/${imageFiles[i % imageFiles.length]}`,
+      ),
+    [cols, imageFiles],
   )
   const textures = useLoader(TextureLoader, images)
   const totalWidth = cols * CELL_WIDTH
