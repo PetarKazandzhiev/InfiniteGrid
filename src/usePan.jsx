@@ -6,7 +6,7 @@ export default function usePan() {
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const velocity = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
-  const SPEED = 0.1
+  const SPEED = 0.001
 
   const bind = useGesture(
     {
