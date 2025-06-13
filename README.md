@@ -1,2 +1,3 @@
 # InfiniteGrid
-an Infinite Grid made with GSAP and react/three js
+
+A starter React + Vite project configured with Tailwind CSS, GSAP, and @react-three/fiber.
