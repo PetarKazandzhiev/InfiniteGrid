@@ -6,6 +6,7 @@ export default function usePan() {
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const velocity = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
+  const SPEED = 0.1
 
   const bind = useGesture(
     {
@@ -15,17 +16,23 @@ export default function usePan() {
         velocity.current.y = 0
       },
       onDrag: ({ delta: [dx, dy] }) => {
-        setOffset((o) => ({ x: o.x - dx, y: o.y + dy }))
-        velocity.current.x = -dx
-        velocity.current.y = dy
+        setOffset((o) => ({
+          x: o.x - dx * SPEED,
+          y: o.y + dy * SPEED,
+        }))
+        velocity.current.x = -dx * SPEED
+        velocity.current.y = dy * SPEED
       },
       onDragEnd: () => {
         isDragging.current = false
       },
       onWheel: ({ delta: [dx, dy] }) => {
-        setOffset((o) => ({ x: o.x - dx, y: o.y - dy }))
-        velocity.current.x = -dx
-        velocity.current.y = -dy
+        setOffset((o) => ({
+          x: o.x - dx * SPEED,
+          y: o.y - dy * SPEED,
+        }))
+        velocity.current.x = -dx * SPEED
+        velocity.current.y = -dy * SPEED
       },
     },
     { drag: { from: () => [0, 0] } },
