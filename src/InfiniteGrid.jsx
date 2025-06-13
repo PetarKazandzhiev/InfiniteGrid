@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { OrthographicCamera } from '@react-three/drei'
 import { TextureLoader } from 'three'
 import usePan from './usePan.jsx'
@@ -50,20 +50,29 @@ function Grid() {
   return <group {...bind()}>{planes}</group>
 }
 
+function ResponsiveCamera() {
+  const { size } = useThree()
+  const aspect = size.width / size.height
+  const viewWidth = VIEW_HEIGHT * aspect
+  return (
+    <OrthographicCamera
+      makeDefault
+      position={[0, 0, 10]}
+      zoom={1}
+      left={-viewWidth / 2}
+      right={viewWidth / 2}
+      top={VIEW_HEIGHT / 2}
+      bottom={-VIEW_HEIGHT / 2}
+      near={0.1}
+      far={100}
+    />
+  )
+}
+
 export default function InfiniteGrid() {
   return (
-    <Canvas frameloop="demand" orthographic>
-      <OrthographicCamera
-        makeDefault
-        position={[0, 0, 10]}
-        zoom={1}
-        left={-VIEW_WIDTH / 2}
-        right={VIEW_WIDTH / 2}
-        top={VIEW_HEIGHT / 2}
-        bottom={-VIEW_HEIGHT / 2}
-        near={0.1}
-        far={100}
-      />
+    <Canvas frameloop="demand" orthographic style={{ width: '100vw', height: '100vh' }}>
+      <ResponsiveCamera />
       <Grid />
     </Canvas>
   )
