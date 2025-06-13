@@ -4,7 +4,6 @@ import { OrthographicCamera } from '@react-three/drei'
 import { TextureLoader } from 'three'
 import usePan from './usePan.jsx'
 
-const COLS = 5
 const ROWS = 10
 const CELL_HEIGHT = 1
 const CELL_WIDTH = (CELL_HEIGHT * 9) / 16
@@ -17,19 +16,21 @@ function wrap(value, size) {
 
 function Grid() {
   const { offset, bind } = usePan()
+  const { viewport } = useThree()
+  const cols = Math.ceil(viewport.width / CELL_WIDTH) + 1
   const images = useMemo(
     () =>
-      Array.from({ length: COLS * ROWS }, (_, i) => `https://picsum.photos/seed/${i}/900/1600`),
-    [],
+      Array.from({ length: cols * ROWS }, (_, i) => `https://picsum.photos/seed/${i}/900/1600`),
+    [cols],
   )
   const textures = useLoader(TextureLoader, images)
-  const totalWidth = COLS * CELL_WIDTH
+  const totalWidth = cols * CELL_WIDTH
   const totalHeight = ROWS * CELL_HEIGHT
 
   useFrame(() => {})
 
   const planes = []
-  for (let c = 0; c < COLS; c += 1) {
+  for (let c = 0; c < cols; c += 1) {
     const speed = c % 2 === 1 ? 2 : 1
     for (let r = 0; r < ROWS; r += 1) {
       const x =
