@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrthographicCamera, Image } from '@react-three/drei';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { OrthographicCamera, RoundedBox } from '@react-three/drei';
+import { TextureLoader } from 'three';
 import usePan from './usePan.jsx';
 
 // configuration
@@ -8,6 +9,7 @@ const VIEW_HEIGHT = 3;
 const VISIBLE_ROWS = 1.5;
 const VISIBLE_COLS = 3.5;
 const GAP_PX = 5;
+const RADIUS_PX = 5;
 
 function wrap(value, size) {
   return ((value % size) + size) % size;
@@ -51,6 +53,8 @@ function Grid() {
     [cols, rows, imageFiles]
   );
 
+  const textures = useLoader(TextureLoader, images);
+
   const totalWidth = cols * (cellWidth + gapX);
   const totalHeight = rows * (cellHeight + gapY);
 
@@ -72,13 +76,17 @@ function Grid() {
         gapY / 2;
       const index = c * rows + r;
       planes.push(
-        <Image
+        <RoundedBox
           key={`${c}-${r}`}
           position={[x, y, 0]}
-          url={images[index]}
-          scale={[cellWidth, cellHeight]}
-          radius={GAP_PX}
-        />
+          args={[cellWidth, cellHeight, 0.01]}
+          radius={Math.min(
+            (RADIUS_PX / size.width) * viewport.width,
+            (RADIUS_PX / size.height) * viewport.height
+          )}
+        >
+          <meshBasicMaterial map={textures[index]} />
+        </RoundedBox>
       );
     }
   }
