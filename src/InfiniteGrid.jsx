@@ -1,15 +1,13 @@
 import { useMemo } from 'react';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
-import { OrthographicCamera } from '@react-three/drei';
-import { TextureLoader } from 'three';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrthographicCamera, Image } from '@react-three/drei';
 import usePan from './usePan.jsx';
 
-//testing
-const ROWS = 10;
-const CELL_HEIGHT = 1;
-const CELL_WIDTH = (CELL_HEIGHT * 9) / 16;
-const VIEW_WIDTH = 3.33;
+// configuration
 const VIEW_HEIGHT = 3;
+const VISIBLE_ROWS = 1.5;
+const VISIBLE_COLS = 3.5;
+const GAP_PX = 5;
 
 function wrap(value, size) {
   return ((value % size) + size) % size;
@@ -17,8 +15,18 @@ function wrap(value, size) {
 
 function Grid() {
   const { offset, bind } = usePan();
-  const { viewport } = useThree();
-  const cols = Math.ceil(viewport.width / CELL_WIDTH) + 1;
+  const { viewport, size } = useThree();
+
+  const gapX = (GAP_PX / size.width) * viewport.width;
+  const gapY = (GAP_PX / size.height) * viewport.height;
+
+  const cellWidth =
+    (viewport.width - (VISIBLE_COLS + 1) * gapX) / VISIBLE_COLS;
+  const cellHeight =
+    (viewport.height - (VISIBLE_ROWS + 1) * gapY) / VISIBLE_ROWS;
+
+  const cols = Math.ceil(viewport.width / (cellWidth + gapX)) + 2;
+  const rows = Math.ceil(viewport.height / (cellHeight + gapY)) + 2;
   const imageFiles = useMemo(
     () => [
       'download.jpeg',
@@ -37,35 +45,40 @@ function Grid() {
   const images = useMemo(
     () =>
       Array.from(
-        { length: cols * ROWS },
+        { length: cols * rows },
         (_, i) => `/${imageFiles[i % imageFiles.length]}`
       ),
-    [cols, imageFiles]
+    [cols, rows, imageFiles]
   );
-  const textures = useLoader(TextureLoader, images);
-  const totalWidth = cols * CELL_WIDTH;
-  const totalHeight = ROWS * CELL_HEIGHT;
+
+  const totalWidth = cols * (cellWidth + gapX);
+  const totalHeight = rows * (cellHeight + gapY);
 
   useFrame(() => {});
 
   const planes = [];
   for (let c = 0; c < cols; c += 1) {
     const speed = c % 2 === 1 ? 2 : 1;
-    for (let r = 0; r < ROWS; r += 1) {
+    for (let r = 0; r < rows; r += 1) {
       const x =
-        wrap(c * CELL_WIDTH - offset.x, totalWidth) -
+        wrap(c * (cellWidth + gapX) - offset.x, totalWidth) -
         totalWidth / 2 +
-        CELL_WIDTH / 2;
+        cellWidth / 2 +
+        gapX / 2;
       const y =
-        wrap(r * CELL_WIDTH - offset.y * speed, totalHeight) -
+        wrap(r * (cellHeight + gapY) - offset.y * speed, totalHeight) -
         totalHeight / 2 +
-        CELL_HEIGHT / 2;
-      const index = c * ROWS + r;
+        cellHeight / 2 +
+        gapY / 2;
+      const index = c * rows + r;
       planes.push(
-        <mesh key={`${c}-${r}`} position={[x, y, 0]}>
-          <planeGeometry args={[CELL_WIDTH, CELL_WIDTH]} />
-          <meshBasicMaterial map={textures[index]} />
-        </mesh>
+        <Image
+          key={`${c}-${r}`}
+          position={[x, y, 0]}
+          url={images[index]}
+          scale={[cellWidth, cellHeight]}
+          radius={GAP_PX}
+        />
       );
     }
   }
