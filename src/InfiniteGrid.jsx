@@ -1,14 +1,20 @@
-import { useMemo } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrthographicCamera, Image } from '@react-three/drei';
-import usePan from './usePan.jsx';
+import { useMemo } from "react";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { OrthographicCamera } from "@react-three/drei";
+import { TextureLoader } from "three";
+import usePan from "./usePan.jsx";
 
-// configuration
-const VIEW_HEIGHT = 3;
-const VISIBLE_ROWS = 1.5;
-const VISIBLE_COLS = 3.5;
-const GAP_PX = 5;
-const RADIUS_PX = 5;
+const ROWS = 10;
+const CELL_HEIGHT = 3;
+const CELL_WIDTH = 3;
+const VIEW_WIDTH = 3.33;
+const VIEW_HEIGHT = 5;
+
+const GAP = 0.1;
+// Effective size including gap
+const EFFECTIVE_CELL_WIDTH = CELL_WIDTH + GAP;
+const EFFECTIVE_CELL_HEIGHT = CELL_HEIGHT + GAP;
+
 
 function wrap(value, size) {
   return ((value % size) + size) % size;
@@ -16,76 +22,66 @@ function wrap(value, size) {
 
 function Grid() {
   const { offset, bind } = usePan();
-  const { viewport, size } = useThree();
-
-  const gapX = (GAP_PX / size.width) * viewport.width;
-  const gapY = (GAP_PX / size.height) * viewport.height;
-
-  const cellWidth =
-    (viewport.width - (VISIBLE_COLS + 1) * gapX) / VISIBLE_COLS;
-  const cellHeight =
-    (viewport.height - (VISIBLE_ROWS + 1) * gapY) / VISIBLE_ROWS;
-
-  const cols = Math.ceil(viewport.width / (cellWidth + gapX)) + 2;
-  const rows = Math.ceil(viewport.height / (cellHeight + gapY)) + 2;
+  const { viewport } = useThree();
+  const cols = Math.ceil(viewport.width / CELL_WIDTH) + 1;
   const imageFiles = useMemo(
     () => [
-      'download.jpeg',
-      'download (1).jpeg',
-      'download (2).jpeg',
-      'download (3).jpeg',
-      'download (4).jpeg',
-      'download (5).jpeg',
-      'download (6).jpeg',
-      'download (7).jpeg',
-      'download (8).jpeg',
-      'download (9).jpeg',
+      "download.jpeg",
+      "download (1).jpeg",
+      "download (2).jpeg",
+      "download (3).jpeg",
+      "download (4).jpeg",
+      "download (5).jpeg",
+      "download (6).jpeg",
+      "download (7).jpeg",
+      "download (8).jpeg",
+      "download (9).jpeg",
+      "download (10).jpeg",
+      "download (11).jpeg",
+      "download (12).jpeg",
+      "download (13).jpeg",
+      "download (14).jpeg",
+      "download (15).jpeg",
+      "download (16).jpeg",
+      "download (17).jpeg",
+      "download (18).jpeg",
+      "download (19).jpeg",
+
     ],
     []
   );
   const images = useMemo(
     () =>
       Array.from(
-        { length: cols * rows },
+        { length: cols * ROWS },
         (_, i) => `/${imageFiles[i % imageFiles.length]}`
       ),
-    [cols, rows, imageFiles]
+    [cols, imageFiles]
   );
-
-
-  const totalWidth = cols * (cellWidth + gapX);
-  const totalHeight = rows * (cellHeight + gapY);
+  const textures = useLoader(TextureLoader, images);
+  const totalWidth = cols * CELL_WIDTH;
+  const totalHeight = ROWS * CELL_HEIGHT;
 
   useFrame(() => {});
-
-  const radius = Math.min(
-    (RADIUS_PX / size.width) * viewport.width,
-    (RADIUS_PX / size.height) * viewport.height
-  );
 
   const planes = [];
   for (let c = 0; c < cols; c += 1) {
     const speed = c % 2 === 1 ? 2 : 1;
-    for (let r = 0; r < rows; r += 1) {
+    for (let r = 0; r < ROWS; r += 1) {
       const x =
-        wrap(c * (cellWidth + gapX) - offset.x, totalWidth) -
+        wrap(c * EFFECTIVE_CELL_WIDTH - offset.x, totalWidth) -
         totalWidth / 2 +
-        cellWidth / 2 +
-        gapX / 2;
+        EFFECTIVE_CELL_WIDTH / 2;
       const y =
-        wrap(r * (cellHeight + gapY) - offset.y * speed, totalHeight) -
+        wrap(r * EFFECTIVE_CELL_HEIGHT - offset.y * speed, totalHeight) -
         totalHeight / 2 +
-        cellHeight / 2 +
-        gapY / 2;
-      const index = c * rows + r;
+        EFFECTIVE_CELL_HEIGHT / 2;
+      const index = c * ROWS + r;
       planes.push(
-        <Image
-          key={`${c}-${r}`}
-          position={[x, y, 0]}
-          url={images[index]}
-          scale={[cellWidth, cellHeight]}
-          radius={radius}
-        />
+        <mesh key={`${c}-${r}`} position={[x, y, 0]}>
+          <planeGeometry args={[CELL_WIDTH, CELL_HEIGHT]} />
+          <meshBasicMaterial map={textures[index]} />
+        </mesh>
       );
     }
   }
@@ -116,7 +112,8 @@ export default function InfiniteGrid() {
     <Canvas
       frameloop="demand"
       orthographic
-      style={{ width: '100vw', height: '100vh' }}>
+      style={{ width: "100vw", height: "100vh" }}
+    >
       <ResponsiveCamera />
       <Grid />
     </Canvas>
