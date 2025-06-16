@@ -15,6 +15,7 @@ const GAP = 0.1;
 const EFFECTIVE_CELL_WIDTH = CELL_WIDTH + GAP;
 const EFFECTIVE_CELL_HEIGHT = CELL_HEIGHT + GAP;
 
+
 function wrap(value, size) {
   return ((value % size) + size) % size;
 }
@@ -45,6 +46,7 @@ function Grid() {
       "download (17).jpeg",
       "download (18).jpeg",
       "download (19).jpeg",
+
     ],
     []
   );
