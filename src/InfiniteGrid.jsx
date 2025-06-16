@@ -15,6 +15,7 @@ const GAP = 0.1;
 const EFFECTIVE_CELL_WIDTH = CELL_WIDTH + GAP;
 const EFFECTIVE_CELL_HEIGHT = CELL_HEIGHT + GAP;
 
+const SCROLL_SPEED = 12;
 
 function wrap(value, size) {
   return ((value % size) + size) % size;
@@ -23,9 +24,10 @@ function wrap(value, size) {
 function Grid() {
   const { offset, bind } = usePan();
   const { viewport } = useThree();
-  const cols = Math.ceil(viewport.width / CELL_WIDTH) + 1;
+  const cols = Math.ceil(viewport.width / EFFECTIVE_CELL_WIDTH) + 1;
   const imageFiles = useMemo(
     () => [
+      "high-resolution-photo-of-chicago-m.jpg",
       "download.jpeg",
       "download (1).jpeg",
       "download (2).jpeg",
@@ -35,18 +37,48 @@ function Grid() {
       "download (6).jpeg",
       "download (7).jpeg",
       "download (8).jpeg",
-      "download (9).jpeg",
-      "download (10).jpeg",
-      "download (11).jpeg",
-      "download (12).jpeg",
-      "download (13).jpeg",
-      "download (14).jpeg",
-      "download (15).jpeg",
-      "download (16).jpeg",
-      "download (17).jpeg",
-      "download (18).jpeg",
-      "download (19).jpeg",
-
+      "high-resolution-photo-of-chicago-m.jpg",
+      "majestic-mountain-peak.jpg",
+      "japan-background.jpg",
+      "galaxy-nature-aesthetic.jpg",
+      "24143.jpg",
+      "34793.jpg",
+      "2150010125.jpg",
+      "269.jpg",
+      "240.jpg",
+      "2149661456.jpg",
+      "dubai-uae-skyline-photo-m.jpg",
+      "download (1).jpeg",
+      "download (2).jpeg",
+      "download (3).jpeg",
+      "download (4).jpeg",
+      "high-resolution-photo-of-chicago-m.jpg",
+      "majestic-mountain-peak.jpg",
+      "japan-background.jpg",
+      "luke-miller.jpg",
+      "galaxy-nature-aesthetic.jpg",
+      "download (4).jpeg",
+      "download (5).jpeg",
+      "download (6).jpeg",
+      "download (7).jpeg",
+      "24143.jpg",
+      "34793.jpg",
+      "2150010125.jpg",
+      "269.jpg",
+      "240.jpg",
+      "2149661456.jpg",
+      "we-care-wild.jpg",
+      "luke-miller.jpg",
+      "luke-miller.jpg",
+      "galaxy-nature-aesthetic.jpg",
+      "download (4).jpeg",
+      "download (5).jpeg",
+      "high-resolution-photo-of-chicago-m.jpg",
+      "download.jpeg",
+      "download (1).jpeg",
+      "download (2).jpeg",
+      "download (3).jpeg",
+      "download (4).jpeg",
     ],
     []
   );
@@ -59,8 +91,8 @@ function Grid() {
     [cols, imageFiles]
   );
   const textures = useLoader(TextureLoader, images);
-  const totalWidth = cols * CELL_WIDTH;
-  const totalHeight = ROWS * CELL_HEIGHT;
+  const totalWidth = cols * EFFECTIVE_CELL_WIDTH;
+  const totalHeight = ROWS * EFFECTIVE_CELL_HEIGHT;
 
   useFrame(() => {});
 
@@ -69,11 +101,14 @@ function Grid() {
     const speed = c % 2 === 1 ? 2 : 1;
     for (let r = 0; r < ROWS; r += 1) {
       const x =
-        wrap(c * EFFECTIVE_CELL_WIDTH - offset.x, totalWidth) -
+        wrap(c * EFFECTIVE_CELL_WIDTH - offset.x * SCROLL_SPEED, totalWidth) -
         totalWidth / 2 +
         EFFECTIVE_CELL_WIDTH / 2;
       const y =
-        wrap(r * EFFECTIVE_CELL_HEIGHT - offset.y * speed, totalHeight) -
+        wrap(
+          r * EFFECTIVE_CELL_HEIGHT - offset.y * speed * SCROLL_SPEED,
+          totalHeight
+        ) -
         totalHeight / 2 +
         EFFECTIVE_CELL_HEIGHT / 2;
       const index = c * ROWS + r;
@@ -92,6 +127,11 @@ function ResponsiveCamera() {
   const { size } = useThree();
   const aspect = size.width / size.height;
   const viewWidth = VIEW_HEIGHT * aspect;
+
+  console.log("viewWidth:", viewWidth);
+  console.log("VIEW_HEIGHT:", VIEW_HEIGHT);
+  console.log("VIEW_WIDTH :", VIEW_WIDTH);
+
   return (
     <OrthographicCamera
       makeDefault
@@ -101,7 +141,7 @@ function ResponsiveCamera() {
       right={viewWidth / 2}
       top={VIEW_HEIGHT / 2}
       bottom={-VIEW_HEIGHT / 2}
-      near={0.1}
+      near={0.5}
       far={100}
     />
   );
